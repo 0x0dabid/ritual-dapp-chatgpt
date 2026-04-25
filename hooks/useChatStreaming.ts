@@ -187,11 +187,13 @@ export function useChatStreaming(encryptedSecrets: `0x${string}`[]) {
         }
 
         // Decode completionData nested ABI for content
-        const [, , , , content] = decodeAbi(
-          "string,string,uint256,string,string,string,uint256,bytes[],bytes",
+        const [, , , , , , , choices] = decodeAbi(
+          "string,string,uint256,string,string,string,uint256,bytes[]",
           completionData as `0x${string}`
         );
-        setText(content);
+        const choiceArr = choices as readonly `0x${string}`[];
+        const [, contentText] = decodeAbi("uint256,string,bytes", choiceArr[0]);
+        setText(contentText as string);
         setStatus("done");
       } catch (e: any) {
         setError(e.message ?? "Unknown error");

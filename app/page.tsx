@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAccount, useWalletClient } from "wagmi";
-import { createPublicClient, http, encodeFunctionData, decodeFunctionResult } from "viem";
+import { createPublicClient, http, encodeFunctionData, decodeFunctionResult, decodeAbiParameters, parseAbiParameters, encodeAbiParameters } from "viem";
 import { Tent, LLM_PRECOMPILE, SECRETS_AC, TEE_REGISTRY } from "@/lib/tent";
 import { Connector } from "@/components/Connector";
 
@@ -173,7 +173,6 @@ export default function Home() {
 
     try {
       const publicClient = createPublicClient({ chain: Tent, transport: http() });
-      const { decodeAbiParameters, parseAbiParameters, encodeAbiParameters } = require("viem");
 
       const msgs = [
         { role: "system", content: "You are a helpful, private, multi-modal AI assistant." },
@@ -226,7 +225,7 @@ export default function Home() {
       const llmOut = spc?.find((c: any) => c.address.toLowerCase() === LLM_PRECOMPILE.toLowerCase())?.output;
       if (!llmOut) throw new Error("No LLM output in spcCalls");
 
-      const [, actual] = decodeAbiParameters(parseAbiParameters("(bool,bytes)"), llmOut as `0x${string}`);
+      const [, actual] = decodeAbiParameters(parseAbiParameters("(bytes,bytes)"), llmOut as `0x${string}`);
       const [hasError, completion] = decodeAbiParameters(parseAbiParameters("(bool,bytes)"), actual as `0x${string}`);
       if (hasError) {
         const [, , , errMsg] = decodeAbiParameters(parseAbiParameters("(bool,bytes,bytes,string)"), actual as `0x${string}`);
@@ -267,26 +266,19 @@ export default function Home() {
         args = [selectedExecutor, 300n, prompt.trim(), "cogvideo/2.0", 512, 512, 5000, storageRef, encryptedSecrets];
       }
 
-      // Initialize UI state
-      setStatus("submitting");
-      setError("");
-      setReply(null);
-
       // Build calldata
       const data = encodeFunctionData({ abi: CHAT_ABI, functionName: fnName, args: args as any });
 
-      // eth_call to get return value (bytes32 reqId) without state change
+      // eth_call to simulate and get the return value (bytes32 reqId)
       const returnData = await publicClient.call({
         to: contractAddr,
         data,
         value: 0n,
       });
-      // Uint8Array -> hex string
-      const dataHex = "0x" + Buffer.from(returnData as any).toString("hex");
       const reqId = decodeFunctionResult({
         abi: CHAT_ABI,
         functionName: fnName,
-        data: dataHex as any,
+        data: returnData.data ?? "0x",
       }) as `0x${string}`;
 
       // Send transaction

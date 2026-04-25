@@ -13,8 +13,9 @@ const config = createConfig({
   connectors: [injected()], // only browser injectors (MetaMask, Brave, etc.)
 });
 
+const qc = new QueryClient();
+
 export function Web3Provider({ children }: { children: ReactNode }) {
-  const qc = new QueryClient();
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={qc}>{children}</QueryClientProvider>
