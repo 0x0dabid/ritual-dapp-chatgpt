@@ -1,0 +1,27 @@
+# Env files (keep secrets local)
+.env.local
+.env.ritual
+.env
+
+# Node modules
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+build/
+
+# Hardhat
+contracts/artifacts/
+contracts/cache/
+contracts/coverage/
+contracts/typechain-types/
+
+# OS
+.DS_Store
+*.log
+
+# IDE
+.idea/
+.vscode/

@@ -1,0 +1,92 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600&family=Barlow:wght@400;500&family=JetBrains+Mono&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ritual-bg: #0A0A0A;
+  --ritual-elevated: #111827;
+  --ritual-green: #19D184;
+  --ritual-lime: #BFFF00;
+  --ritual-pink: #FF1DCE;
+  --ritual-gold: #FACC15;
+  --ritual-primary: #F1F5F9;
+  --ritual-secondary: #94A3B8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--ritual-bg);
+  color: var(--ritual-primary);
+  font-family: "Barlow", sans-serif;
+}
+
+/* ── Typography utility classes ── */
+.font-archivo { font-family: "Archivo", sans-serif; }
+.font-barlow  { font-family: "Barlow", sans-serif; }
+.font-mono    { font-family: "JetBrains Mono", monospace; }
+
+.font-black   { font-weight: 900; }
+.font-semibold{ font-weight: 600; }
+.font-medium  { font-weight: 500; }
+.font-normal  { font-weight: 400; }
+
+/* ── Tailwind custom colour tokens ── */
+.bg-ritual-bg       { background-color: #0A0A0A; }
+.bg-ritual-elevated { background-color: #111827; }
+.text-ritual-primary { color: #F1F5F9; }
+.text-ritual-secondary{ color: #94A3B8; }
+.text-ritual-green { color: #19D184; }
+.text-ritual-lime  { color: #BFFF00; }
+.text-ritual-pink  { color: #FF1DCE; }
+.border-ritual-green/20 { border-color: rgba(25, 209, 132, 0.2); }
+.border-ritual-green/40 { border-color: rgba(25, 209, 132, 0.4); }
+.border-white/10  { border-color: rgba(255,255,255,0.1); }
+.border-white/5   { border-color: rgba(255,255,255,0.05); }
+
+/* ── Cards & shadows ── */
+.shadow-card {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+}
+.glow-green {
+  box-shadow: 0 0 20px rgba(25,209,132,0.3);
+}
+.glow-pink {
+  box-shadow: 0 0 20px rgba(255,29,206,0.3);
+}
+.glow-lime {
+  box-shadow: 0 0 20px rgba(191,255,0,0.2);
+}
+
+/* ── Background mesh gradient (Cognoxide brand palette) ── */
+.mesh-gradient {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(25, 209, 132, 0.12), transparent),
+    radial-gradient(ellipse 60% 60% at 100% 100%, rgba(255, 29, 206, 0.08), transparent);
+}
+
+/* ── Noise overlay (fixed, very low opacity) ── */
+.bg-noise {
+  background-image: url("/noise.svg");
+  background-repeat: repeat;
+  opacity: 0.04; /* Washed-out texture */
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ── Utilities ── */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Input ranges / scrollbars ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
