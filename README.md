@@ -9,7 +9,7 @@ Full-stack dApp that runs ChatGPT-style AI **entirely on-chain** using Ritual Ch
 
 ---
 
-## 📂 Monorepo Layout
+## 📂 Repo Layout
 
 ```
 ~/ritual-dapp-chatgpt/
@@ -21,14 +21,16 @@ Full-stack dApp that runs ChatGPT-style AI **entirely on-chain** using Ritual Ch
 │   ├─ hardhat.config.ts
 │   └─ package.json
 │
-├─ web/                Next.js 14 frontend (viem + wagmi)
-│   ├─ app/page.tsx      ← chat UI
+├─ app/                Next.js 14 frontend (viem + wagmi)
+│   ├─ page.tsx          ← chat / image / audio / video UI
 │   ├─ hooks/useChatStreaming.ts
 │   ├─ lib/tent.ts       ← chain config
 │   ├─ styles/globals.css← Ritual dark palette + Cognoxide branding
-│   └─ package.json
+│   └─ components/…      ← Web3Provider, Connector
 │
-└─ WEB-README.md       ← frontend-specific details
+├─ package.json        ← workspace root with npm scripts
+├─ .env.local          ← frontend env vars (ignored by git)
+└─ README.md           ← you are here
 ```
 
 ---
@@ -73,8 +75,34 @@ Expected output:
 
 ### 3. Start the frontend
 
+## 🚀 Deploy to Vercel
+
+One-click deployment from GitHub:
+
+1. **Import repo** — Go to https://vercel.com/new, connect GitHub, select `ritual-dapp-chatgpt` from `0x0dabid`.
+2. **Root directory** — Already set (Next.js at repo root). No change needed.
+3. **Environment variables** — In Project Settings → Environment Variables, add:
+
+   ```
+   NEXT_PUBLIC_RITUAL_CHAIN_ID=11022
+   NEXT_PUBLIC_RITUAL_RPC_URL=https://rpc.ritualfoundation.org
+   NEXT_PUBLIC_CHATGPT_CONTRACT_ADDRESS=0x55Ba36dF7a960e9B73D89fCE7f285325588a40Ad
+   NEXT_PUBLIC_GCS_PROJECT_ID=          # optional
+   GCS_SA_KEY=                           # optional
+   GCS_CLIENT_EMAIL=                     # optional
+   GCS_BUCKET=                           # optional
+   ```
+
+4. **Deploy** — Click Deploy. Vercel auto-detects Next.js 14 and builds.
+
+**Note:** Without GCS credentials, Image/Audio/Video generation will fail. Chat (LLM) works without GCS.
+
+---
+
+
+
 ```bash
-cd ~/ritual-dapp-chatgpt/web
+cd ~/ritual-dapp-chatgpt
 
 # Install Next.js deps
 npm install
@@ -191,3 +219,7 @@ The frontend:
 Contract compiles → artifacts ready. Frontend scaffold complete. Ready to deploy once `RITUAL_PRIVATE_KEY` is set and the Ritual testnet faucet has funded the wallet.
 
 Run the deploy and you'll have a fully on-chain, private, multi-modal ChatGPT running on Ritual in <2 minutes.
+
+## 🚀 Deploy to Vercel
+
+(see Vercel skill / one-click deploy from GitHub)
