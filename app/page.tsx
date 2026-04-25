@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAccount, useWalletClient } from "wagmi";
-import { createPublicClient, http, encodeFunctionData } from "viem";
+import { createPublicClient, http, encodeFunctionData, decodeFunctionResult } from "viem";
 import { Tent, LLM_PRECOMPILE, SECRETS_AC, TEE_REGISTRY } from "@/lib/tent";
 import { Connector } from "@/components/Connector";
 
@@ -159,7 +159,7 @@ export default function Home() {
         };
         const pubKeyBuf = Buffer.from(pubKeyHex.slice(2), "hex");
         const encrypted = ECIES.encrypt(pubKeyBuf, Buffer.from(JSON.stringify(payload)));
-        setEncryptedSecrets([`0x${encrypted.toString("hex")}`]);
+        setEncryptedSecrets([`0x${Buffer.from(encrypted).toString("hex")}`]);
       } catch (e) {
         console.error("Setup failed:", e);
       }
@@ -239,7 +239,7 @@ export default function Home() {
       const choiceAbi = parseAbiParameters("uint256,string,bytes");
       const [, contentRaw] = decodeAbiParameters(choiceAbi, (choices[0] as any));
       setReply({ type: "text", content: contentRaw as string });
-      setStatus("done");
+      setStatus("idle");
     } catch (e: any) {
       setError(e.message); setStatus("error");
     }
@@ -267,25 +267,38 @@ export default function Home() {
         args = [selectedExecutor, 300n, prompt.trim(), "cogvideo/2.0", 512, 512, 5000, storageRef, encryptedSecrets];
       }
 
-      // Submit transaction
-      const data = encodeFunctionData({ abi: CHAT_ABI, functionName: fnName, args });
+      // Initialize UI state
+      setStatus("submitting");
+      setError("");
+      setReply(null);
+
+      // Build calldata
+      const data = encodeFunctionData({ abi: CHAT_ABI, functionName: fnName, args: args as any });
+
+      // eth_call to get return value (bytes32 reqId) without state change
+      const returnData = await publicClient.call({
+        to: contractAddr,
+        data,
+        value: 0n,
+      });
+      // Uint8Array -> hex string
+      const dataHex = "0x" + Buffer.from(returnData as any).toString("hex");
+      const reqId = decodeFunctionResult({
+        abi: CHAT_ABI,
+        functionName: fnName,
+        data: dataHex as any,
+      }) as `0x${string}`;
+
+      // Send transaction
       const hash = await wc.sendTransaction({ to: contractAddr, data, gas: 3_000_000n });
       setTxHash(hash);
 
-      // Wait for receipt to persist mapping
+      // Wait for inclusion
       await publicClient.waitForTransactionReceipt({ hash });
-
-      // Call same function as view to get reqId (no state change)
-      const reqId = await publicClient.readContract({
-        address: contractAddr,
-        abi: CHAT_ABI,
-        functionName: fnName,
-        args,
-      }) as `0x${string}`;
 
       setStatus("settling");
 
-      // Poll for result
+      // Poll getMediaResult(reqId)
       for (let i = 0; i < 60; i++) {
         await new Promise(r => setTimeout(r, 2000));
         const res = await publicClient.readContract({
@@ -297,7 +310,7 @@ export default function Home() {
         const [uri] = res;
         if (uri && uri !== "") {
           setReply({ type: "uri", content: uri });
-          setStatus("done");
+          setStatus("idle");
           return;
         }
       }
@@ -342,7 +355,7 @@ export default function Home() {
               className={`px-4 py-2 rounded-lg capitalize font-semibold transition-all ${
                 modality === m
                   ? "bg-ritual-pink text-white shadow-card"
-                  : "bg-ritual-elevated border border-[rgba(255,255,255,0.1)] text-ritual-secondary hover:border-ritual-green/40"
+                  : "bg-ritual-elevated border border-[rgba(255,255,255,0.1)] text-ritual-secondary hover:border-ritual-green-40"
               }`}
             >
               {m}

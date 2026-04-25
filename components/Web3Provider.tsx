@@ -8,7 +8,7 @@ import { Tent } from "../lib/tent";
 const config = createConfig({
   chains: [Tent],
   transports: {
-    [Tent.id]: http(() => process.env.NEXT_PUBLIC_RITUAL_RPC_URL!),
+    [Tent.id]: http(process.env.NEXT_PUBLIC_RITUAL_RPC_URL!),
   },
   connectors: [injected()], // only browser injectors (MetaMask, Brave, etc.)
 });

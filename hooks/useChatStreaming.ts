@@ -155,7 +155,7 @@ export function useChatStreaming(encryptedSecrets: `0x${string}`[]) {
         setStatus("settling");
 
         // Wait for settlement to read spcCalls
-        const receipt = await wc.waitForTransactionReceipt({ hash });
+        const receipt = await publicClient.waitForTransactionReceipt({ hash });
         console.log("LLM settled:", receipt);
         setStatus("done");
 
